@@ -16,32 +16,9 @@
     </div>
 
     <div id="app-container">
-        <!-- Home Screen -->
-        <main id="home-screen">
-            <header>
-                <h1>CASINO</h1>
-                <p>Welcome, Player. Choose your game.</p>
-            </header>
-
-            <div class="game-grid">
-                <div class="game-card glass" id="launch-blackjack">
-                    <div class="badge">POPULAR</div>
-                    <h3>Blackjack</h3>
-                    <p>Beat the dealer to 21.</p>
-                </div>
-                <!-- Future games can be added here -->
-                <div class="game-card glass" style="opacity: 0.5; cursor: not-allowed;">
-                    <div class="badge" style="background: #444; color: #fff;">COMING SOON</div>
-                    <h3>Roulette</h3>
-                    <p>Spin the wheel of fortune.</p>
-                </div>
-            </div>
-        </main>
-
         <!-- Blackjack Game View -->
-        <div id="blackjack-view" class="game-view">
+        <div id="blackjack-view" class="game-view" style="display: flex;">
             <div class="game-header glass">
-                <button class="btn-back" id="exit-blackjack">← BACK</button>
                 <div class="game-title">BLACKJACK</div>
                 <div class="balance">Balance: $<span id="balance-val">1000</span></div>
             </div>
