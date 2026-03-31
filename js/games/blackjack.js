@@ -8,8 +8,17 @@ class BlackjackGame {
         this.gameState = 'betting'; // betting, playing, resolved
 
         this.initElements();
+
+        // Trainer counts
+        this.runningCount = 0;
+        this.plusOneCount = 0;
+        this.zeroCount = 0;
+        this.minusOneCount = 0;
+        this.deck = this.createDeck();
+
         this.addEventListeners();
         this.updateUI();
+        this.updateTrainerUI();
     }
 
     initElements() {
@@ -32,6 +41,22 @@ class BlackjackGame {
         this.playerSection = document.querySelector('.player-section');
         this.dealerScoreOverlay = document.getElementById('dealer-score-overlay');
         this.playerScoreOverlay = document.getElementById('player-score-overlay');
+
+        // Trainer elements
+        this.expertModeToggle = document.getElementById('expert-mode-toggle');
+        this.trainerOverlay = document.getElementById('trainer-overlay');
+        this.countPlusOneEl = document.getElementById('count-plus-one');
+        this.countZeroEl = document.getElementById('count-zero');
+        this.countMinusOneEl = document.getElementById('count-minus-one');
+        this.runningCountEl = document.getElementById('running-count');
+        this.handStatusEl = document.getElementById('hand-status');
+        this.deckSizeEl = document.getElementById('deck-size');
+        this.showSumToggle = document.getElementById('show-sum-toggle');
+        
+        // Info Modal elements
+        this.infoBtn = document.getElementById('info-btn');
+        this.infoModal = document.getElementById('info-modal');
+        this.closeInfoBtn = document.getElementById('close-info-btn');
     }
 
     addEventListeners() {
@@ -40,6 +65,14 @@ class BlackjackGame {
         this.standBtn.onclick = () => this.playerStand();
         this.doubleBtn.onclick = () => this.playerDouble();
         this.playAgainBtn.onclick = () => this.reset();
+
+        this.expertModeToggle.onchange = (e) => {
+            this.trainerOverlay.style.display = e.target.checked ? 'block' : 'none';
+        };
+        this.showSumToggle.onchange = () => this.updateUI();
+
+        if (this.infoBtn) this.infoBtn.onclick = () => this.infoModal.style.display = 'block';
+        if (this.closeInfoBtn) this.closeInfoBtn.onclick = () => this.infoModal.style.display = 'none';
     }
 
     createDeck() {
@@ -88,6 +121,54 @@ class BlackjackGame {
 
         return score;
     }
+    resetCounts() {
+        this.runningCount = 0;
+        this.plusOneCount = 0;
+        this.zeroCount = 0;
+        this.minusOneCount = 0;
+        this.updateTrainerUI();
+    }
+
+    countCard(card) {
+        if (!card) return;
+        const val = this.getCardValue(card);
+        if (val >= 2 && val <= 6) {
+            this.plusOneCount++;
+            this.runningCount += 1;
+        } else if (val >= 7 && val <= 9) {
+            this.zeroCount++;
+        } else if (val >= 10) {
+            this.minusOneCount++;
+            this.runningCount -= 1;
+        }
+        this.updateTrainerUI();
+    }
+
+    updateTrainerUI() {
+        if (!this.countPlusOneEl) return;
+        this.countPlusOneEl.innerText = this.plusOneCount;
+        this.countZeroEl.innerText = this.zeroCount;
+        this.countMinusOneEl.innerText = this.minusOneCount;
+        this.runningCountEl.innerText = (this.runningCount > 0 ? '+' : '') + this.runningCount;
+        this.deckSizeEl.innerText = this.deck.length;
+
+        const decksRemaining = Math.max(1, this.deck.length / 52);
+        const trueCount = this.runningCount / decksRemaining;
+        
+        let status = "Neutral";
+        let color = "var(--text-secondary)";
+        if (trueCount >= 1) {
+            status = "Hot";
+            color = "var(--danger)";
+        } else if (trueCount <= -1) {
+            status = "Cold";
+            color = "#3498db";
+        }
+        
+        this.handStatusEl.innerText = status;
+        this.handStatusEl.style.color = color;
+    }
+
 
     startRound() {
         const bet = parseInt(this.betInput.value);
@@ -95,10 +176,20 @@ class BlackjackGame {
 
         this.currentBet = bet;
         this.balance -= bet;
-        this.deck = this.createDeck();
+
+        if (this.deck.length < 75) {
+            this.deck = this.createDeck();
+            this.resetCounts();
+        }
+
         this.playerHand = [this.drawCard(), this.drawCard()];
         this.dealerHand = [this.drawCard(), this.drawCard()];
         this.gameState = 'playing';
+
+        // Count initial visible cards
+        this.countCard(this.playerHand[0]);
+        this.countCard(this.playerHand[1]);
+        this.countCard(this.dealerHand[1]); // Dealer's upcard
         this.updateUI();
 
         if (this.calculateScore(this.playerHand) === 21) {
@@ -111,7 +202,9 @@ class BlackjackGame {
     }
 
     playerHit() {
-        this.playerHand.push(this.drawCard());
+        const card = this.drawCard();
+        this.playerHand.push(card);
+        this.countCard(card);
         if (this.calculateScore(this.playerHand) >= 21) {
             this.playerStand();
         }
@@ -122,7 +215,9 @@ class BlackjackGame {
         if (this.balance < this.currentBet) return alert('Not enough balance');
         this.balance -= this.currentBet;
         this.currentBet *= 2;
-        this.playerHand.push(this.drawCard());
+        const card = this.drawCard();
+        this.playerHand.push(card);
+        this.countCard(card);
         this.playerStand();
     }
 
@@ -130,12 +225,19 @@ class BlackjackGame {
         this.gameState = 'resolved';
         this.updateUI();
 
+        // Count dealer's hole card now that it's revealed
+        if (this.dealerHand.length > 0) {
+            this.countCard(this.dealerHand[0]);
+        }
+
         const playerScore = this.calculateScore(this.playerHand);
 
         if (playerScore <= 21) {
             // Dealer's turn
             while (this.calculateScore(this.dealerHand) < 17) {
-                this.dealerHand.push(this.drawCard());
+                const card = this.drawCard();
+                this.dealerHand.push(card);
+                this.countCard(card);
                 this.updateUI();
                 await new Promise(r => setTimeout(r, 600));
             }
@@ -219,7 +321,8 @@ class BlackjackGame {
         this.renderHand(this.playerHandEl, this.playerHand, false);
         this.renderHand(this.dealerHandEl, this.dealerHand, this.gameState === 'playing');
 
-        this.playerScoreEl.innerText = this.playerHand.length ? this.calculateScore(this.playerHand) : '';
+        const showPlayerScore = this.showSumToggle && this.showSumToggle.checked || this.gameState === 'resolved';
+        this.playerScoreEl.innerText = (this.playerHand.length && showPlayerScore) ? this.calculateScore(this.playerHand) : '';
         this.dealerScoreEl.innerText = (this.gameState === 'resolved' && this.dealerHand.length) ? this.calculateScore(this.dealerHand) : '';
 
         if (this.gameState === 'betting') {

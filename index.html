@@ -63,6 +63,14 @@
 
                 <div class="controls glass">
                     <div id="betting-controls">
+                        <div class="trainer-toggle" style="display: flex; align-items: center; gap: 8px; margin-right: 15px;">
+                            <input type="checkbox" id="expert-mode-toggle" class="toggle-checkbox">
+                            <label for="expert-mode-toggle" style="color: #fff; font-size: 0.9rem; cursor: pointer;">Count Overlay</label>
+                        </div>
+                        <div class="trainer-toggle" style="display: flex; align-items: center; gap: 8px; margin-right: 15px;">
+                            <input type="checkbox" id="show-sum-toggle" class="toggle-checkbox" checked>
+                            <label for="show-sum-toggle" style="color: #fff; font-size: 0.9rem; cursor: pointer;">Show Sum</label>
+                        </div>
                         <input type="number" id="bet-input" value="10" min="1" step="1" class="glass" style="padding: 10px; color: #fff; width: 80px;">
                         <button id="deal-btn" class="btn btn-primary">DEAL</button>
                     </div>
@@ -77,6 +85,59 @@
                     <h2 id="status-msg">WINNER!</h2>
                     <button id="play-again-btn" class="btn btn-primary">PLAY AGAIN</button>
                 </div>
+
+                <!-- Trainer Overlay -->
+                <div id="trainer-overlay" class="trainer-overlay glass" style="display: none;">
+                    <h3>Count Overlay</h3>
+                    <table class="count-table">
+                        <tr>
+                            <th>Group</th>
+                            <th>Count</th>
+                        </tr>
+                        <tr>
+                            <td>+1 (2-6)</td>
+                            <td id="count-plus-one" class="count-val">0</td>
+                        </tr>
+                        <tr>
+                            <td>0 (7-9)</td>
+                            <td id="count-zero" class="count-val">0</td>
+                        </tr>
+                        <tr>
+                            <td>-1 (10-A)</td>
+                            <td id="count-minus-one" class="count-val">0</td>
+                        </tr>
+                    </table>
+                    <div class="count-stats">
+                        <div class="stat">Running: <span id="running-count">0</span></div>
+                        <div class="stat">Status: <span id="hand-status">Neutral</span></div>
+                        <div class="stat" style="font-size: 0.8rem; margin-top: 5px; color: var(--text-secondary);">Cards left: <span id="deck-size">0</span></div>
+                    </div>
+                    <button id="info-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px; font-size: 0.8rem; padding: 6px;">More Info</button>
+                </div>
+
+                <!-- Info Modal -->
+                <div id="info-modal" class="status-overlay glass" style="display: none; width: 90%; max-width: 500px; padding: 2rem; z-index: 200;">
+                    <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">Hi-Lo Card Counting</h2>
+                    <div style="text-align: left; font-size: 1rem; line-height: 1.5; color: var(--text-secondary);">
+                        <p>Card counting tracks the ratio of high cards to low cards remaining. A positive count means the deck favors the player!</p>
+                        <br>
+                        <h3 style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 0.5rem;">Values:</h3>
+                        <ul style="margin-left: 20px; list-style-type: disc;">
+                            <li><strong>+1</strong>: 2, 3, 4, 5, 6</li>
+                            <li><strong>0</strong>: 7, 8, 9</li>
+                            <li><strong>-1</strong>: 10, J, Q, K, A</li>
+                        </ul>
+                        <br>
+                        <h3 style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 0.5rem;">Quick Tips:</h3>
+                        <ul style="margin-left: 20px; list-style-type: disc;">
+                            <li><strong>Cancel out:</strong> When you see a high card and low card pair, they equal 0! Ignore them simultaneously.</li>
+                            <li><strong>True Count:</strong> Divide your running count by the rough number of decks left. Play huge on high true counts (+2 and up).</li>
+                            <li><strong>Stealth:</strong> Practice tracking the count while holding a conversation.</li>
+                        </ul>
+                    </div>
+                    <button id="close-info-btn" class="btn btn-primary" style="margin-top: 2rem; width: 100%;">GOT IT</button>
+                </div>
+
             </div>
         </div>
     </div>
