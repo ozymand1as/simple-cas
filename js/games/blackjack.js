@@ -192,8 +192,9 @@ class BlackjackGame {
         this.countCard(this.dealerHand[1]); // Dealer's upcard
         this.updateUI();
 
-        if (this.calculateScore(this.playerHand) === 21) {
-            this.playerStand(); // Blackjack check
+        // Check for immediate natural blackjack
+        if (this.calculateScore(this.playerHand) === 21 || this.calculateScore(this.dealerHand) === 21) {
+            this.playerStand(); 
         }
     }
 
